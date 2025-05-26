@@ -18,6 +18,7 @@ from ayon_core.tools.utils import (
     PixmapLabel,
 )
 from ayon_core.tools.utils.lib import center_window
+from ayon_core.tools.ui_settings_mixin import UiSettingsMixin
 
 from .constants import ResetKeySequence
 from .publish_report_viewer import PublishReportViewerWidget
@@ -43,10 +44,10 @@ from .widgets import (
 )
 
 
-class PublisherWindow(QtWidgets.QDialog):
+class PublisherWindow(QtWidgets.QDialog, UiSettingsMixin):
     """Main window of publisher."""
     default_width = 1300
-    default_height = 800
+    default_height = 920
     footer_border = 8
     publish_footer_spacer = 2
 
@@ -398,6 +399,13 @@ class PublisherWindow(QtWidgets.QDialog):
         self._show_counter = 0
         self._window_is_visible = False
 
+        # Use meaningful organization and application names
+        self.settings = QtCore.QSettings("Ayon", f"Ayon_{self.__class__.__name__}")
+
+        # Initialize settings mixin
+        self.setup_settings("Ayon_Settings", default_size=(2400, 1200))
+        self.restore_window_settings()
+
     @property
     def controller(self) -> AbstractPublisherFrontend:
         """Kept for compatibility with traypublisher."""
@@ -551,7 +559,6 @@ class PublisherWindow(QtWidgets.QDialog):
         )
 
     def _on_first_show(self):
-        self.resize(self.default_width, self.default_height)
         self.setStyleSheet(style.load_stylesheet())
         center_window(self)
         self._reset_on_show = self._reset_on_first_show

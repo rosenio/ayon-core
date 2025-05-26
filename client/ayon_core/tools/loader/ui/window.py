@@ -1,4 +1,5 @@
 from qtpy import QtWidgets, QtCore, QtGui
+from qtpy.QtCore import QSettings
 
 from ayon_core.resources import get_ayon_icon_filepath
 from ayon_core.style import load_stylesheet
@@ -12,6 +13,7 @@ from ayon_core.tools.utils import (
 from ayon_core.tools.utils.lib import center_window
 from ayon_core.tools.utils import ProjectsCombobox
 from ayon_core.tools.loader.control import LoaderController
+from ayon_core.tools.ui_settings_mixin import UiSettingsMixin
 
 from .folders_widget import LoaderFoldersWidget
 from .tasks_widget import LoaderTasksWidget
@@ -117,7 +119,7 @@ class RefreshHandler:
         self._products_refreshed = True
 
 
-class LoaderWindow(QtWidgets.QWidget):
+class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
     def __init__(self, controller=None, parent=None):
         super(LoaderWindow, self).__init__(parent)
 
@@ -127,6 +129,7 @@ class LoaderWindow(QtWidgets.QWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Window)
+        
 
         if controller is None:
             controller = LoaderController()
@@ -341,15 +344,26 @@ class LoaderWindow(QtWidgets.QWidget):
             self._product_group_checkbox.isChecked()
         )
 
+        self.settings = QSettings("window_size", "settings")
+        
+        # Use meaningful organization and application names
+        self.settings = QtCore.QSettings("Ayon", f"Ayon_{self.__class__.__name__}")
+
+        # Initialize settings mixin
+        self.setup_settings("Ayon_Settings", default_size=(1920, 1000))
+        self.restore_window_settings()
+
     def refresh(self):
         self._reset_on_show = False
         self._controller.reset()
 
     def showEvent(self, event):
         super().showEvent(event)
+        
 
         if self._first_show:
             self._on_first_show()
+        
 
         self._show_timer.start()
 
@@ -382,8 +396,11 @@ class LoaderWindow(QtWidgets.QWidget):
 
     def _on_first_show(self):
         self._first_show = False
+        
+        
         # width, height = 1800, 900
-        width, height = 1500, 750
+        width  = self.geometry().width()
+        height = self.geometry().height()
 
         self.resize(width, height)
 
@@ -537,3 +554,6 @@ class LoaderWindow(QtWidgets.QWidget):
 
     def _on_products_refresh(self):
         self._refresh_handler.set_products_refreshed()
+
+    def closeEvent(self, event):
+        self.settings.setValue("window_size", self.geometry().size())

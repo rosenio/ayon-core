@@ -8,7 +8,7 @@ from ayon_core import style
 
 class ConsoleDialog(QtWidgets.QDialog):
     """Qt dialog to show stdout instead of unwieldy cmd window"""
-    WIDTH = 720
+    WIDTH = 920
     HEIGHT = 450
     MAX_LINES = 10000
 

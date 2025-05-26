@@ -4,13 +4,14 @@ from ayon_core import style
 from ayon_core import resources
 
 from ayon_core.tools.launcher.control import BaseLauncherController
+from ayon_core.tools.ui_settings_mixin import UiSettingsMixin
 
 from .projects_widget import ProjectsWidget
 from .hierarchy_page import HierarchyPage
 from .actions_widget import ActionsWidget
 
 
-class LauncherWindow(QtWidgets.QWidget):
+class LauncherWindow(QtWidgets.QWidget, UiSettingsMixin):
     """Launcher interface"""
     message_interval = 5000
     refresh_interval = 10000
@@ -74,8 +75,8 @@ class LauncherWindow(QtWidgets.QWidget):
         # Set useful default sizes and set stretch
         # for the pages so that is the only one that
         # stretches on UI resize.
-        content_body.setStretchFactor(0, 10)
-        content_body.setSizes([580, 160])
+        content_body.setStretchFactor(0, 20)
+        content_body.setSizes([580, 260])
 
         # Footer
         footer_widget = QtWidgets.QWidget(self)
@@ -150,19 +151,28 @@ class LauncherWindow(QtWidgets.QWidget):
         self._page_slide_anim = page_slide_anim
 
         hierarchy_page.setVisible(not self._is_on_projects_page)
-        self.resize(520, 740)
+        #self.resize(520, 740)
 
+        # Use meaningful organization and application names
+        self.settings = QtCore.QSettings("Ayon", f"Ayon_{self.__class__.__name__}")
+
+        # Initialize settings mixin
+        self.setup_settings("Ayon_Settings", default_size=(1024, 920))
+        self.restore_window_settings()
+    
     def showEvent(self, event):
         super().showEvent(event)
         self._window_is_active = True
         if not self._actions_refresh_timer.isActive():
             self._actions_refresh_timer.start()
         self._controller.refresh()
+        
 
     def closeEvent(self, event):
         super().closeEvent(event)
         self._window_is_active = False
         self._actions_refresh_timer.stop()
+
 
     def changeEvent(self, event):
         if event.type() in (
@@ -175,7 +185,8 @@ class LauncherWindow(QtWidgets.QWidget):
                 self._refresh_on_activate = False
                 self._on_actions_refresh_timeout()
                 self._actions_refresh_timer.start()
-
+            
+        
         super().changeEvent(event)
 
     def _on_actions_refresh_timeout(self):
