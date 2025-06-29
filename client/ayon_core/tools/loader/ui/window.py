@@ -129,7 +129,6 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Window)
-        
 
         if controller is None:
             controller = LoaderController()
@@ -345,7 +344,7 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
         )
 
         self.settings = QSettings("window_size", "settings")
-        
+
         # Use meaningful organization and application names
         self.settings = QtCore.QSettings("Ayon", f"Ayon_{self.__class__.__name__}")
 
@@ -359,11 +358,9 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
 
     def showEvent(self, event):
         super().showEvent(event)
-        
 
         if self._first_show:
             self._on_first_show()
-        
 
         self._show_timer.start()
 
@@ -377,6 +374,7 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
         )
 
         self._reset_on_show = True
+        self.settings.setValue("window_size", self.geometry().size())
 
     def keyPressEvent(self, event):
         modifiers = event.modifiers()
@@ -396,8 +394,6 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
 
     def _on_first_show(self):
         self._first_show = False
-        
-        
         # width, height = 1800, 900
         width  = self.geometry().width()
         height = self.geometry().height()
@@ -554,6 +550,3 @@ class LoaderWindow(QtWidgets.QWidget, UiSettingsMixin):
 
     def _on_products_refresh(self):
         self._refresh_handler.set_products_refreshed()
-
-    def closeEvent(self, event):
-        self.settings.setValue("window_size", self.geometry().size())

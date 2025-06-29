@@ -193,13 +193,11 @@ class LauncherWindow(QtWidgets.QWidget, UiSettingsMixin):
         if not self._actions_refresh_timer.isActive():
             self._actions_refresh_timer.start()
         self._controller.refresh()
-        
 
     def closeEvent(self, event):
         super().closeEvent(event)
         self._window_is_active = False
         self._actions_refresh_timer.stop()
-
 
     def changeEvent(self, event):
         if event.type() in (
@@ -212,8 +210,7 @@ class LauncherWindow(QtWidgets.QWidget, UiSettingsMixin):
                 self._refresh_on_activate = False
                 self._on_actions_refresh_timeout()
                 self._actions_refresh_timer.start()
-            
-        
+
         super().changeEvent(event)
 
     def _on_actions_refresh_timeout(self):
